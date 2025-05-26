@@ -24,6 +24,8 @@ public class Escritor {
     private Long idAutor;
 
     @NotBlank(message = "O nome é obrigatório")
+    private String name;
+
     @Size(min = 11, max = 11, message = "O cpf deve ter 11 digitos")
     private String cpf;
 
