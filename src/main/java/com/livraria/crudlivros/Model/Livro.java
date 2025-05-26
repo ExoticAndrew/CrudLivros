@@ -18,7 +18,7 @@ public class Livro {
     private Long idLivro;
 
     @NotBlank(message = "O nome do livro é obrigatório")
-    private Double name;
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "id_autor", nullable = false)
