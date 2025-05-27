@@ -52,6 +52,36 @@ public class LivroService {
         return mapToResponseDTO(livro);
     }
 
+    public List<LivroResponseDTO> buscarPorAutor(String nomeAutor) {
+        return livroRepository.findByAutorNomeContainingIgnoreCase(nomeAutor)
+                .stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public LivroResponseDTO atualizar(Long id, LivroRequestDTO dto) {
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+
+        Escritor autor = escritorRepository.findById(dto.getIdAutor())
+                .orElseThrow(() -> new RuntimeException("Autor não encontrado"));
+
+        livro.setName(dto.getName());
+        livro.setAutor(autor);
+        livro.setPreco(dto.getPreco());
+        livro.setEditora(dto.getEditora());
+        livro.setAnoPublicacao(dto.getAnoPublicacao());
+
+        livro = livroRepository.save(livro);
+        return mapToResponseDTO(livro);
+    }
+
+    public void deletar(Long id) {
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+        livroRepository.delete(livro);
+    }
+
     private LivroResponseDTO mapToResponseDTO(Livro livro) {
         EscritorDTO autorDTO = new EscritorDTO(
                 livro.getAutor().getIdAutor(),
