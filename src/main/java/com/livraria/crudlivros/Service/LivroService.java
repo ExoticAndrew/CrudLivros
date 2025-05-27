@@ -53,7 +53,7 @@ public class LivroService {
     }
 
     public List<LivroResponseDTO> buscarPorAutor(String nomeAutor) {
-        return livroRepository.findByAutorNomeContainingIgnoreCase(nomeAutor)
+        return livroRepository.findByAutorNameContainingIgnoreCase(nomeAutor)
                 .stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
