@@ -24,6 +24,7 @@ public class EscritorService {
     public Escritor salvar(Escritor escritor){
         return escritorRepository.save(escritor);
     }
+
      public Escritor atualizar(Long id, Escritor escritorAtualizado){
         Escritor existente = buscarPorId(id);
         existente.setName(escritorAtualizado.getName());
@@ -32,7 +33,10 @@ public class EscritorService {
         existente.setIdade(escritorAtualizado.getIdade());
         return escritorRepository.save(existente);
      }
-
+    public void deletar(long id){
+        Escritor escritor = buscarPorId(id);
+        escritorRepository.delete(escritor);
+    }
 
 
 }
