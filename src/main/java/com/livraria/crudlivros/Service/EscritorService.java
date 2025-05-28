@@ -2,6 +2,8 @@ package com.livraria.crudlivros.Service;
 
 import com.livraria.crudlivros.Model.Escritor;
 import com.livraria.crudlivros.Repository.EscritorRepository;
+import com.livraria.crudlivros.Exception.CpfJaCadastradoException;
+import com.livraria.crudlivros.Exception.EscritorNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,12 +23,12 @@ public class EscritorService {
 
     public Escritor buscarPorId(Long id) {
         return escritorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Escritor não encontrado"));
+                .orElseThrow(() -> new EscritorNotFoundException("Escritor não encontrado"));
     }
 
     public Escritor salvar(Escritor escritor) {
         if (escritorRepository.existsByCpf(escritor.getCpf())) {
-            throw new RuntimeException("Já existe um escritor com esse CPF.");
+            throw new CpfJaCadastradoException("Já existe um escritor com esse CPF.");
         }
         return escritorRepository.save(escritor);
     }
