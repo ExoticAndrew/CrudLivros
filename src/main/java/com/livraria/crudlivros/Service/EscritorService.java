@@ -1,5 +1,7 @@
 package com.livraria.crudlivros.Service;
 
+import com.livraria.crudlivros.Dto.EscritorDTO;
+import com.livraria.crudlivros.Exception.EmailJaCadastradoException;
 import com.livraria.crudlivros.Model.Escritor;
 import com.livraria.crudlivros.Repository.EscritorRepository;
 import com.livraria.crudlivros.Exception.CpfJaCadastradoException;
@@ -26,20 +28,35 @@ public class EscritorService {
                 .orElseThrow(() -> new EscritorNotFoundException("Escritor não encontrado"));
     }
 
-    public Escritor salvar(Escritor escritor) {
-        if (escritorRepository.existsByCpf(escritor.getCpf())) {
+    public List<Escritor> buscarPorNome(String nome) {
+        return escritorRepository.findByNameContainingIgnoreCase(nome);
+    }
+
+    public Escritor salvar(EscritorDTO dto) {
+        if (escritorRepository.existsByCpf(dto.getCpf())) {
             throw new CpfJaCadastradoException("Já existe um escritor com esse CPF.");
         }
+
+        if (escritorRepository.existsByEmail(dto.getEmail())) {
+            throw new EmailJaCadastradoException("Já existe um escritor com esse e-mail.");
+        }
+
+        if(dto.getIdade() < 18) {
+            throw new IllegalArgumentException("A idade do escritor deve ser maior ou igual a 18 anos.");
+        }
+
+        Escritor escritor = new Escritor(dto);
+
         return escritorRepository.save(escritor);
     }
 
-    public Escritor atualizar(Long id, Escritor escritorAtualizado) {
+    public Escritor atualizar(Long id, EscritorDTO dto) {
         Escritor existente = buscarPorId(id);
 
-        existente.setName(escritorAtualizado.getName());
-        existente.setCpf(escritorAtualizado.getCpf());
-        existente.setEmail(escritorAtualizado.getEmail());
-        existente.setIdade(escritorAtualizado.getIdade());
+        existente.setName(dto.getName());
+        existente.setCpf(dto.getCpf());
+        existente.setEmail(dto.getEmail());
+        existente.setIdade(dto.getIdade());
 
         return escritorRepository.save(existente);
     }

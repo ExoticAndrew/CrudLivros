@@ -12,6 +12,5 @@ public class LivroResponseDTO {
     private String editora;
     private int anoPublicacao;
     private Double preco;
-    private EscritorDTO autor;
 
 }

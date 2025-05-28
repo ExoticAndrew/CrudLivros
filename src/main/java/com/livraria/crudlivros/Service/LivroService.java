@@ -1,6 +1,7 @@
 package com.livraria.crudlivros.Service;
 
 import com.livraria.crudlivros.Dto.EscritorDTO;
+import com.livraria.crudlivros.Dto.LivroAndEscritorResponseDTO;
 import com.livraria.crudlivros.Dto.LivroRequestDTO;
 import com.livraria.crudlivros.Dto.LivroResponseDTO;
 import com.livraria.crudlivros.Model.Escritor;
@@ -9,6 +10,7 @@ import com.livraria.crudlivros.Repository.EscritorRepository;
 import com.livraria.crudlivros.Repository.LivroRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,16 +18,15 @@ import java.util.stream.Collectors;
 public class LivroService {
 
     private final LivroRepository livroRepository;
-    private final EscritorRepository escritorRepository;
+    private final EscritorService escritorService;
 
-    public LivroService(LivroRepository livroRepository, EscritorRepository escritorRepository) {
+    public LivroService(LivroRepository livroRepository, EscritorService escritorService) {
         this.livroRepository = livroRepository;
-        this.escritorRepository = escritorRepository;
+        this.escritorService = escritorService;
     }
 
     public LivroResponseDTO salvar(LivroRequestDTO dto) {
-        Escritor autor = escritorRepository.findById(dto.getIdAutor())
-                .orElseThrow(() -> new RuntimeException("Autor não encontrado"));
+        Escritor autor = escritorService.buscarPorId(dto.getIdAutor());
 
         Livro livro = new Livro();
         livro.setName(dto.getName());
@@ -52,19 +53,31 @@ public class LivroService {
         return mapToResponseDTO(livro);
     }
 
-    public List<LivroResponseDTO> buscarPorAutor(String nomeAutor) {
-        return livroRepository.findByAutorNameContainingIgnoreCase(nomeAutor)
+    public List<LivroResponseDTO> buscarTodosPorIdAutor(Long id) {
+        Escritor autor = escritorService.buscarPorId(id);
+        return livroRepository.findAllByAutor(autor)
                 .stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<LivroAndEscritorResponseDTO> buscarPorAutor(String nomeAutor) {
+        List<Escritor> autores = escritorService.buscarPorNome(nomeAutor);
+        List<LivroAndEscritorResponseDTO> dtos = new ArrayList<>();
+
+        for (Escritor autor : autores) {
+            List<LivroResponseDTO> livrosDto = buscarTodosPorIdAutor(autor.getIdAutor());
+            dtos.add(new LivroAndEscritorResponseDTO(new EscritorDTO(autor), livrosDto));
+        }
+
+        return dtos;
     }
 
     public LivroResponseDTO atualizar(Long id, LivroRequestDTO dto) {
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
-        Escritor autor = escritorRepository.findById(dto.getIdAutor())
-                .orElseThrow(() -> new RuntimeException("Autor não encontrado"));
+        Escritor autor = escritorService.buscarPorId(dto.getIdAutor());
 
         livro.setName(dto.getName());
         livro.setAutor(autor);
@@ -83,20 +96,12 @@ public class LivroService {
     }
 
     private LivroResponseDTO mapToResponseDTO(Livro livro) {
-        EscritorDTO autorDTO = new EscritorDTO(
-                livro.getAutor().getIdAutor(),
-                livro.getAutor().getName(),
-                livro.getAutor().getEmail(),
-                livro.getAutor().getIdade()
-        );
-
         return new LivroResponseDTO(
                 livro.getIdLivro(),
                 livro.getName(),
                 livro.getEditora(),
                 livro.getAnoPublicacao(),
-                livro.getPreco(),
-                autorDTO
+                livro.getPreco()
         );
     }
 }
