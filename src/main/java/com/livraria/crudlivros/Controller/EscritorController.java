@@ -31,12 +31,12 @@ public class EscritorController {
     }
 
     @PostMapping
-    public ResponseEntity<Escritor> salvar(@Valid @RequestBody EscritorDTO dto) {
+    public ResponseEntity<EscritorDTO> salvar(@Valid @RequestBody EscritorDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(escritorService.salvar(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Escritor> atualizar(@PathVariable Long id, @Valid @RequestBody EscritorDTO escritor) {
+    public ResponseEntity<EscritorDTO> atualizar(@PathVariable Long id, @Valid @RequestBody EscritorDTO escritor) {
         return ResponseEntity.ok(escritorService.atualizar(id, escritor));
     }
 

@@ -32,7 +32,7 @@ public class EscritorService {
         return escritorRepository.findByNameContainingIgnoreCase(nome);
     }
 
-    public Escritor salvar(EscritorDTO dto) {
+    public EscritorDTO salvar(EscritorDTO dto) {
         if (escritorRepository.existsByCpf(dto.getCpf())) {
             throw new CpfJaCadastradoException("Já existe um escritor com esse CPF.");
         }
@@ -41,16 +41,16 @@ public class EscritorService {
             throw new EmailJaCadastradoException("Já existe um escritor com esse e-mail.");
         }
 
-        if(dto.getIdade() < 18) {
+        if (dto.getIdade() < 18) {
             throw new IllegalArgumentException("A idade do escritor deve ser maior ou igual a 18 anos.");
         }
 
-        Escritor escritor = new Escritor(dto);
+        Escritor escritor = escritorRepository.save(new Escritor(dto));
 
-        return escritorRepository.save(escritor);
+        return new EscritorDTO(escritor);
     }
 
-    public Escritor atualizar(Long id, EscritorDTO dto) {
+    public EscritorDTO atualizar(Long id, EscritorDTO dto) {
         Escritor existente = buscarPorId(id);
 
         existente.setName(dto.getName());
@@ -58,7 +58,9 @@ public class EscritorService {
         existente.setEmail(dto.getEmail());
         existente.setIdade(dto.getIdade());
 
-        return escritorRepository.save(existente);
+        Escritor escritor = escritorRepository.save(existente);
+
+        return new EscritorDTO(escritor);
     }
 
     public void deletar(long id) {
